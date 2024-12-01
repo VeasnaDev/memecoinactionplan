@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <title>Meme Coin Project Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            padding: 20px;
+            background: #f0f2f5;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        h1, h2 {
+            color: #1a237e;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .presale-target {
+            text-align: center;
+            padding: 15px;
+            background: #e3f2fd;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .target-amount {
+            font-size: 24px;
+            color: #1565c0;
+            font-weight: bold;
+        }
+
+        .phase {
+            margin-bottom: 30px;
+        }
+
+        .phase-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            background: #e3f2fd;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .phase-title {
+            font-weight: bold;
+            color: #1565c0;
+        }
+
+        .progress-container {
+            width: 200px;
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: #2196f3;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .tasks {
+            padding-left: 20px;
+        }
+
+        .task {
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .task input[type="checkbox"] {
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+        }
+
+        .task label {
+            font-size: 14px;
+            color: #333;
+        }
+
+        .total-progress {
+            text-align: center;
+            margin-top: 20px;
+            font-weight: bold;
+            color: #1565c0;
+        }
+
+        .completed {
+            text-decoration: line-through;
+            color: #888;
+        }
+
+        .presale-input {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .presale-input input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 150px;
+        }
+
+        .presale-input button {
+            padding: 8px 15px;
+            background: #1565c0;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .presale-input button:hover {
+            background: #1976d2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>គម្រោង Meme Coin (២ខែ)</h1>
+        
+        <div class="presale-target">
+            <h2>គោលដៅ Presale</h2>
+            <div>បច្ចុប្បន្ន: $<span id="currentAmount">0</span> / គោលដៅ: $<span class="target-amount">100,000</span></div>
+            <div class="progress-container" style="width: 100%; margin: 10px 0;">
+                <div id="presaleProgress" class="progress-bar"></div>
+            </div>
+            <div class="presale-input">
+                <input type="number" id="presaleAmount" placeholder="ចំនួនទឹកប្រាក់ ($)">
+                <button onclick="updatePresaleAmount()">បន្ថែម</button>
+            </div>
+        </div>
+        
+        <div id="phases">
+            <!-- Phases will be dynamically added here -->
+        </div>
+
+        <div class="total-progress">
+            វឌ្ឍនភាពសរុប: <span id="totalProgress">0</span>%
+        </div>
+    </div>
+
+    <script>
+        // Project data with all tasks
+        const projectData = {
+            "ខែទី១ សប្តាហ៍ទី១: ការត្រៀម": [
+                "រៀបចំការិយាល័យ និងសម្ភារៈ",
+                "បង្កើតប្រព័ន្ធគ្រប់គ្រងផ្ទៃក្នុង",
+                "រៀបចំ Web3 wallet",
+                "ជ្រើសរើសក្រុមការងារស្នូល",
+                "បណ្តុះបណ្តាលផ្នែកបច្ចេកទេស",
+                "បង្កើតកាក់ចំនួន 1.2B"
+            ],
+            "ខែទី១ សប្តាហ៍ទី២: បង្កើតសហគមន៍ & ប្រព័ន្ធ Presale": [
+                "បង្កើតក្រុម និងឆាណែលតេលេក្រាម",
+                "បង្កើត bot សម្រាប់គ្រប់គ្រងក្រុម",
+                "បង្កើតគណនី Twitter/X និងរៀបចំផែនការ Raid",
+                "បង្កើតគណនី Discord និងរៀបចំសហគមន៍",
+                "បង្កើតប្រព័ន្ធ ICO ជាមួយ affiliate",
+                "បង្កើតគេហទំព័រ Presale",
+                "រៀបចំប្រព័ន្ធទូទាត់ប្រាក់"
+            ],
+            "ខែទី១ សប្តាហ៍ទី៣-៤: ដំណើរការ Presale & សហគមន៍": [
+                "ចាប់ផ្តើមលក់ Presale",
+                "បង្កើតក្រុមលក់ និងក្រុមទីផ្សារ",
+                "ធ្វើយុទ្ធនាការផ្សព្វផ្សាយលើ Facebook",
+                "ចាប់ផ្តើមធ្វើ Raid លើ Twitter/X",
+                "បង្កើត Presale buybot ក្នុងក្រុមតេលេក្រាម",
+                "បង្កើតសកម្មភាពក្នុងក្រុមតេលេក្រាម",
+                "Live call on Telegram group",
+                "រៀបចំកម្មវិធីលើកទឹកចិត្តសមាជិក",
+                "តាមដាន និងកែសម្រួលយុទ្ធសាស្ត្រលក់",
+                "ធ្វើបច្ចុប្បន្នភាពព័ត៌មានជូនសហគមន៍"
+            ],
+            "ខែទី២ សប្តាហ៍ទី១-២: ពង្រឹងសហគមន៍ & ត្រៀម Launch": [
+                "បន្តធ្វើយុទ្ធនាការ Presale",
+                "បង្កើតសកម្មភាពថ្មីៗក្នុងសហគមន៍",
+                "រៀបចំឯកសារ KYC/Audit",
+                "ត្រៀមបង្កើត Market ID នៅ Raydium",
+                "ត្រៀមបង្កើត Liquidity pool"
+            ],
+            "ខែទី២ សប្តាហ៍ទី៣-៤: List on Dex": [
+                "បង្កើត Market ID នៅ Raydium",
+                "បង្កើត និង Burn Liquidity pool",
+                "រៀបចំព័ត៌មាននៅ Dexscreener",
+                "Setup buy bot using Safe guard bot",
+                "បង្កើតប្រព័ន្ធ Maker",
+                "ចាប់ផ្តើម Boost តម្លៃ",
+                "រៀបចំការគ្រប់គ្រងសេដ្ឋកិច្ចក្រោយ Launch",
+                "តាមដាន និងកែសម្រួលតម្លៃ"
+            ]
+        };
+
+        // Track presale amount
+        let currentPresaleAmount = 0;
+
+        // Function to update presale amount
+        function updatePresaleAmount() {
+            const input = document.getElementById('presaleAmount');
+            const amount = parseFloat(input.value) || 0;
+            currentPresaleAmount += amount;
+            document.getElementById('currentAmount').textContent = currentPresaleAmount.toLocaleString();
+            const percentage = (currentPresaleAmount / 100000) * 100;
+            document.getElementById('presaleProgress').style.width = `${Math.min(percentage, 100)}%`;
+            input.value = '';
+        }
+
+        // Function to create phase elements
+        function createPhaseElement(phaseTitle, tasks) {
+            const phase = document.createElement('div');
+            phase.className = 'phase';
+            
+            const header = document.createElement('div');
+            header.className = 'phase-header';
+            
+            const title = document.createElement('div');
+            title.className = 'phase-title';
+            title.textContent = phaseTitle;
+            
+            const progressContainer = document.createElement('div');
+            progressContainer.className = 'progress-container';
+            
+            const progressBar = document.createElement('div');
+            progressBar.className = 'progress-bar';
+            
+            progressContainer.appendChild(progressBar);
+            header.appendChild(title);
+            header.appendChild(progressContainer);
+            phase.appendChild(header);
+            
+            const tasksList = document.createElement('div');
+            tasksList.className = 'tasks';
+            
+            tasks.forEach((task, index) => {
+                const taskElement = document.createElement('div');
+                taskElement.className = 'task';
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = `${phaseTitle}-${index}`;
+                checkbox.addEventListener('change', updateProgress);
+                
+                const label = document.createElement('label');
+                label.htmlFor = checkbox.id;
+                label.textContent = task;
+                
+                taskElement.appendChild(checkbox);
+                taskElement.appendChild(label);
+                tasksList.appendChild(taskElement);
+            });
+            
+            phase.appendChild(tasksList);
+            return phase;
+        }
+
+        // Function to update progress
+        function updateProgress() {
+            const phases = document.querySelectorAll('.phase');
+            let totalTasks = 0;
+            let completedTasks = 0;
+            
+            phases.forEach(phase => {
+                const tasks = phase.querySelectorAll('input[type="checkbox"]');
+                const completed = Array.from(tasks).filter(task => task.checked).length;
+                const progressBar = phase.querySelector('.progress-bar');
+                const labels = phase.querySelectorAll('label');
+                
+                tasks.forEach((task, index) => {
+                    if(task.checked) {
+                        labels[index].classList.add('completed');
+                    } else {
+                        labels[index].classList.remove('completed');
+                    }
+                });
+                
+                progressBar.style.width = `${(completed / tasks.length) * 100}%`;
+                totalTasks += tasks.length;
+                completedTasks += completed;
+            });
+            
+            const totalProgress = document.getElementById('totalProgress');
+            totalProgress.textContent = Math.round((completedTasks / totalTasks) * 100);
+        }
+
+        // Initialize the tracker
+        const phasesContainer = document.getElementById('phases');
+        Object.entries(projectData).forEach(([phase, tasks]) => {
+            phasesContainer.appendChild(createPhaseElement(phase, tasks));
+        });
+    </script>
+</body>
+</html>
